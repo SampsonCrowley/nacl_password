@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+bin/migrate
+bin/test $@

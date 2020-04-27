@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -f ./nacl_password.gemspec ]; then
+  # tar -C ./ -zxvf versions.tar.gz
+  rm -rf nacl_password-*.gem
+  gem build nacl_password.gemspec
+  gem push nacl_password-*.gem
+fi
