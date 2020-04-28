@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 
-bin/migrate
-bin/test $@
+FULL_SUITE=1 bin/spec $@

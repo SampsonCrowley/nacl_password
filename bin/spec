@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
+printf "\n\n####################### RUNNING TESTS #######################\n\n"
 
-bin/run_tests $@
+bin/migrate
+bin/test $@
+
+printf "\n\n####################### TESTS COMPLETE #######################\n\n"

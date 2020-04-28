@@ -113,11 +113,11 @@ module NaClPassword
         attr_reader attribute
 
         define_method("#{attribute}=") do |given_password|
+          instance_variable_set("@#{attribute}", given_password.presence)
+
           if given_password.nil? || given_password.empty?
             self.__send__("#{digest_attribute}=", nil)
           else
-            instance_variable_set("@#{attribute}", given_password)
-
             self.__send__(
               "#{digest_attribute}=",
               NaClPassword.generate(given_password)
@@ -177,7 +177,7 @@ module NaClPassword
         #   user.authenticate_password('mUc3m00RsqyRe') # => user
         #   user.authenticate_password('notright')      # => nil
         define_method("authenticate_#{attribute}") do |given_password|
-          attribute_digest = __send__ digest_attribute
+          return nil unless attribute_digest = __send__(digest_attribute)
           if NaClPassword.authenticate(attribute_digest, given_password)
             self
           end
