@@ -30,7 +30,7 @@ end
 class ActiveSupport::TestCase
   # Run tests in parallel with specified workers
   unless CoerceBoolean.from(ENV['SYNC_TEST'])
-    # parallelize(workers: :number_of_processors)
+    parallelize(workers: :number_of_processors)
   end
 
   # Add more helper methods to be used by all tests here...
@@ -44,7 +44,7 @@ class ActiveSupport::TestCase
   end
 
   def assert_is_setter(object, mthd, inst_v = nil)
-    inst_v ||= :"@#{mthd.sub("=", '')}"
+    inst_v ||= :"@#{mthd.to_s.sub("=", '')}"
 
     original = object.instance_variable_get(inst_v)
     object.instance_variable_set(inst_v, "#{rand}.#{Time.now}")

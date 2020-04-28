@@ -4,6 +4,8 @@
 require 'test_helper'
 
 class NaClPassword::Test < ActiveSupport::TestCase
+  FULL_SUITE = CoerceBoolean.from(ENV["FULL_SUITE"])
+
   ENCODING_REGEX = %r{
     ((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?\.){2}
     ([3-9]|10)\.
@@ -18,6 +20,20 @@ class NaClPassword::Test < ActiveSupport::TestCase
     MEM_LIMIT_RANGE
     DIGEST_SIZE_RANGE
   ].freeze
+
+  PREDEFINED_OPTS = FULL_SUITE ?
+    %i[
+      min
+      interactive
+      moderate
+      sensitive
+      max
+    ] :
+    %i[
+      min
+      interactive
+      sensitive
+    ]
 
   def does_call_class_method(method_to_stub, **opts, &block)
     does_call_method NaClPassword, method_to_stub, **opts, &block
@@ -74,13 +90,7 @@ class NaClPassword::Test < ActiveSupport::TestCase
 
     test ".#{mthd}= parses input and sets @#{mthd} from predefined options (:min, :interactive, :moderate, :sensitive, :max)" do
       symbol_value = original = NaClPassword.instance_variable_get(var)
-      %i[
-        min
-        interactive
-        moderate
-        sensitive
-        max
-      ].each do |level|
+      PREDEFINED_OPTS.each do |level|
         symbol_value = NaClPassword.__send__("#{mthd}=", level)
         assert_instance_of Integer, symbol_value
         assert_equal NaClPassword.__send__(mthd), symbol_value
@@ -125,6 +135,8 @@ class NaClPassword::Test < ActiveSupport::TestCase
     end
 
     next if mthd == "digest_size"
+
+    next unless FULL_SUITE
 
     test ".#{mthd}= accepts any number in range of #{mthd.upcase}_RANGE" do
       range = NaClPassword.const_get(:"#{mthd.upcase}_RANGE")
@@ -249,13 +261,7 @@ class NaClPassword::Test < ActiveSupport::TestCase
     original_mem = NaClPassword.mem_limit
     original_dig = NaClPassword.digest_size
 
-    %i[
-      min
-      interactive
-      moderate
-      sensitive
-      max
-    ].each do |level|
+    PREDEFINED_OPTS.each do |level|
       %w[
         ops_limit
         mem_limit

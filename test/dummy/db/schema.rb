@@ -14,6 +14,7 @@ ActiveRecord::Schema.define(version: 2020_04_27_201443) do
 
   create_table "test_models", force: :cascade do |t|
     t.text "password_digest"
+    t.text "no_minimum_digest"
     t.text "non_standard_attr"
     t.text "non_validated_digest"
     t.datetime "created_at", precision: 6, null: false

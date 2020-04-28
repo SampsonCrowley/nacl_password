@@ -3,9 +3,10 @@
 script_path=$(realpath $0)
 dir_path=$(dirname $script_path)
 root_path=$(dirname $dir_path )
- 
+
 dummy_dir="$root_path/test/dummy"
 pushd "$dummy_dir"
+rails db:drop
 rails db:create
 rails db:migrate
 popd

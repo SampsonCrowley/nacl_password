@@ -188,12 +188,104 @@ class NaClPassword::ConcernTest < ActiveSupport::TestCase
     end
   end
 
-  test '#`attribute`_ready? returns true if a digest is saved and a new password is not given' do
+  test '#`attribute` is a reader for @`attribute`' do
     tmp_class = Class.new(TmpClass)
     tmp_class.nacl_password
+    tmp_class.nacl_password "tmp"
+    assert_is_getter tmp_class.new, :password
+    assert_is_getter tmp_class.new, :tmp
+  end
+
+  test '#`attribute`= is a setter for @`attribute`' do
+    tmp_class = Class.new(TmpClass)
+    tmp_class.class_eval <<-EVAL
+      attr_accessor :password_digest
+      attr_accessor :tmp_digest
+    EVAL
+    tmp_class.nacl_password
+    tmp_class.nacl_password "tmp"
+    assert_is_setter tmp_class.new, :password=
+    assert_is_setter tmp_class.new, :tmp=
+  end
+
+  test '#`attribute`= clears the digest_attribute if empty' do
+    tmp_class = Class.new(TmpClass)
+    tmp_class.nacl_password
+    instance = tmp_class.new
+    called_with = true
+    stub = ->(arg) { called_with = arg }
+    instance.stub(:password_digest=, stub) do
+      instance.password = nil
+    end
+    assert_nil called_with
+  end
+
+  test '#`attribute`= creates a new digest when not empty' do
+    tmp_class = Class.new(TmpClass)
+    tmp_class.nacl_password
+    instance = tmp_class.new
+    called_with = nil
+    stub = ->(arg) { called_with = arg }
+    instance.stub(:password_digest=, stub) do
+      instance.password = "password"
+    end
+    refute_nil called_with
+    assert_match /^([^.]+\.){2}(\d+\.){2}\d+$/, called_with
+    assert_equal "password", instance.instance_variable_get(:@password)
+  end
+
+  test '#authenticate_`attribute`(password) returns `self` if the given password matches' do
+    tmp_class = Class.new(TmpClass)
+    tmp_class.nacl_password
+    instance = tmp_class.new
+
+    instance.password = "password"
+    assert_equal instance, instance.authenticate_password("password")
+    10.times do
+      instance.password = password = "#{rand}"
+      assert_equal instance, instance.authenticate_password(password)
+    end
+  end
+
+  test '#authenticate_`attribute`(password) returns `nil` if the given password does not match' do
+    tmp_class = Class.new(TmpClass)
+    tmp_class.nacl_password
+    instance = tmp_class.new
+
+    instance.password = "password"
+    assert_nil instance.authenticate_password("password2")
+  end
+
+  test '#authenticate is an alias for #authenticate_`attribute`(password) if `attribute` is password' do
+    tmp_class = Class.new(TmpClass)
+    tmp_class.nacl_password "tmp"
+    instance = tmp_class.new
+
+    refute instance.respond_to? :authenticate
+    assert instance.respond_to? :authenticate_tmp
+
+    tmp_class.nacl_password
+    instance = tmp_class.new
+    assert instance.respond_to? :authenticate
+    assert instance.respond_to? :authenticate_password
+
+    tmp_class = Class.new(TmpClass)
+    instance = tmp_class.new
+    refute instance.respond_to? :authenticate
+
+    tmp_class.nacl_password :password
+    instance = tmp_class.new
+
+    assert instance.respond_to? :authenticate
+    assert instance.respond_to? :authenticate_password
+  end
+
+  test '#`attribute`_ready? returns true if a digest is saved and a new password is not given' do
+    tmp_class = Class.new(TmpClass)
     tmp_class.class_eval <<-EVAL
       attr_accessor :password_digest
     EVAL
+    tmp_class.nacl_password
 
     instance = tmp_class.new
 
@@ -230,6 +322,11 @@ class NaClPassword::ConcernTest < ActiveSupport::TestCase
 
     instance.password = "asdffds"
     instance.password_confirmation = "asdffds"
+
+    refute instance.password_ready?
+
+    instance.password = password = "a" * (NaClPassword::MAX_PASSWORD_LENGTH + 1)
+    instance.password_confirmation = password
 
     refute instance.password_ready?
 
