@@ -8,7 +8,7 @@ module NaClPassword
     extend ActiveSupport::Concern
 
     module ClassMethods
-      # Adds methods to set and authenticate against a Argon2 password.
+      # Adds methods to set and authenticate against an Argon2 password.
       # This mechanism requires you to have a +XXX_digest+ attribute.
       # Where +XXX+ is the attribute name of your desired password.
       # the +digest+ attribute to use can be set by passing
