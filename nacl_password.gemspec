@@ -23,6 +23,6 @@ Gem::Specification.new do |s|
   s.add_dependency "coerce_boolean", "~> 0.1"
   s.add_dependency "rbnacl", "~> 7.1"
 
-  s.add_development_dependency "rails", "~> 6.0", ">= 6.0.3.3"
+  s.add_development_dependency "rails", "~> 6.0", ">= 6.0.3.5"
   s.add_development_dependency "sqlite3"
 end
